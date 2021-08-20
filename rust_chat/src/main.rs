@@ -1,36 +1,111 @@
+mod util;
+
 use std::io;
 use num_bigint::BigUint;
+use std::path::Path;
+use std::io::prelude::*;
 use std::fs;
+use std::fs::File;
+
 // Notes: https://github.com/rsarky/og-rsa/blob/master/src/lib.rs
 
 //(e, d, n)
 type KeySet = (BigUint, BigUint, BigUint);
 
-// I THINK THE ERROR COMRES FROM THE FACT THAT THE KEYS ARE SO SMALL THAT WE HAVE TOO MANY COLLISIONS!
-// IMPLEMENT A PROPER WAY TO GENERATE KEYS BEFORE ANYTHING
+/* TO DO
+    - Generate key pairs
+    - Store them in readable file if non-existing
+    - Read keypair from file, if existing
 
 
-//Hard coded toy example for keypair gen
+*/
     /*
         n = p*q
         d = e^-1 mod (p-1 * q-1)
     */  
-fn createKeyPair() -> KeySet
+
+
+
+//A lot here works, when p and q are the correct type. Just uncomment again... Working on getting correct primes rn.
+fn obtain_key_pair() //-> KeySet
 {
-    let p = BigUint::from(5u64);
-    let q = BigUint::from(11u64);
-    return(BigUint::from(7u64), BigUint::from(23u64), p*q);
-}
+
+    /*
+        First check if the client already has a key pair stored.
+        If he does, read it from the file
+        Else, create a key pair and store it in a file
+    */
+
+
+    if Path::new("keys.txt").exists()
+    {
+        println!("File exists"); //Report that file indeed exists
+    }
+    else
+    {
+        println!("No keys were found - generating your keypair... This may take some time");
+        let e = BigUint::from(65537u64); //hard coding e for now...
+        
+        //This BigUInt is not the same as the other for some reason...
+        //let p = Generator::new_prime(512); //Returns a biguint. Key size should be 2048 - shorter for testing
+        //let q = Generator::new_prime(512);
+
+        //We need that p mod e =/= 1 and same for q - they have to be co-prime
+        
+        /*if p % e == 1
+        {
+
+        }*/
+
+        //let n = &p*&q;
+        //println!("n as generated: {}", n);
+        
+        //Compute the rest of the keypair from here...
+
+
+
+        /* An implementation of generating files and writing to them in Rust found on the internet */
+
+        /*let mut file = match File::create("keys.txt") 
+        {
+            Err(_) => panic!("Error while creating file for storing key pair... Terminating process"),
+            Ok(key_file) => key_file
+        };
+    
+        match file.write_all(&n.to_bytes_be()) 
+        {
+            Err(_) => panic!("Error while writing to key pair file... Terminating process"),
+            Ok(_) => println!("Key fild was sucessfully created...")
+        };*/
+
+
+        //This actually restores our n from the file!
+
+        let test = fs::read("keys.txt")
+        .expect("Couldnt read file.");
+        let test = BigUint::from_bytes_be(&test);
+        
+        //println!("n after reading from file: {}", test);
+
+        //Write to the file: https://doc.rust-lang.org/std/fs/struct.File.html
+    }
+
+    /*
+        let p = BigUint::from(5u64);
+        let q = BigUint::from(11u64);
+        return(BigUint::from(7u64), BigUint::from(23u64), p*q);
+    */
+    }
 
 
 // c = m^e mod n
-fn encrypt(m: BigUint, n: BigUint, e: BigUint) -> BigUint
+fn encrypt(m: &BigUint, n: &BigUint, e: &BigUint) -> BigUint
 {
     return m.modpow(&e, &n);
 }
 
 // m = c^d mod n
-fn decrypt(c: BigUint, n: BigUint, d: BigUint) -> BigUint
+fn decrypt(c: &BigUint, n: &BigUint, d: &BigUint) -> BigUint
 {
     return c.modpow(&d, &n);
 }
@@ -49,42 +124,13 @@ fn get_msg() -> BigUint
     return BigUint::from_bytes_be(message.as_bytes()); 
 }
 
-fn read_key(file: &str) -> String
-{ 
-    return fs::read_to_string(file)
-        .expect("Something went wrong reading the file");
-}
-
-
-
-
 fn main() {
-
-
-    //println!("Result was: {}", result);
     
-    let file = read_key("test.txt");
+    //println!("Enter a message:");
 
-    //let message = BigUint::from(42u64); //Hard coded message - encrypts to "48"
-    //let cipher = encrypt(message, n, e);
-
-    
-
-    //println!("Cipher: {}", cipher);
-    //println!("Hard coded result: {}", decrypt(BigUint::from(48u64), key.2, key.1));
- 
-    /* Something is wrong with enc/dec
-        println!("Message entered in BigUInt representation: {} ", message);
-        //println!("Message encrypted: {}", encrypt(message, key.2, key.0));
-        let test :BigUint = BigUint::from(40u64); 
-        //Cause of "moved" error, we compute the encrypted message before: Result was 40 of "hello"
-        println!("Encrypted message decrypted: {}", decrypt(test, key.2, key.1));
-    */
-
-    println!("Enter a message:");
-
-    let key: KeySet = createKeyPair();
-    let message = get_msg(key.2, key.0, key.1);
-
+    //let key: KeySet = createKeyPair();
+    //let message = get_msg();
+    //obtain_key_pair();
+    util::generate_primes(15);
 
 }
