@@ -1,11 +1,14 @@
+extern crate num;
+
 use num_bigint::BigUint;
 use num_bigint::RandBigInt;
 use num_traits::{Zero, One};
+use num::Integer;
+//use std::io::prelude::*;
+use core::ops::Sub;
+use num_traits::*;
 
-use std::io::prelude::*;
-
-
-type PrimePair = (BigUint, BigUint);
+//type PrimePair = (BigUint, BigUint);
 
 /* Since the lib itself (num_primes) gives a wrong type, we simply implement it ourselves using the src code from https://docs.rs/num-primes/0.1.2/src/num_primes/lib.rs.html#89-100*/
 
@@ -23,14 +26,34 @@ pub fn generate_primes(bit_size: usize) -> BigUint
 }
 
 //We must check that the number indeed is prime... We use the same strategy as https://docs.rs/num-primes/0.1.2/src/num_primes/lib.rs.html#377
+//Note: If implementation is wrong, maybe my reimplementations of the above is wrong - then just copy the lib src code
+
 fn is_prime(n: &BigUint) -> bool
 {
-    println!("Testing: the number is {}", n);
-    if n % BigUint::from(2u64) == BigUint::from(0u64) {return false;}
+    //println!("Testing: the number is {}", n);
+    if n % BigUint::from(2u64) == BigUint::from(0u64) //If even then not prime
+    {
+        //println!("Number is even"); 
+        return false;
+    } 
     
-    if !div_small_primes(&n) {return false}
-    
-    return true;
+    if !div_small_primes(&n) //If our number is divisible by small primes it's not suitable 
+    {
+        //println!("Number divisible by small prime"); 
+        return false
+    } 
+    if !fermat_primality_test(&n) 
+    {
+        //println!("Number failed fermat's primality test"); 
+        return false;
+    }
+    if !miller_rabin(n, 16) 
+    {
+        //println!("Number failed Miller-Rabin test"); 
+        return false;
+    }
+
+    return true; //If all tests pass, we believe our number is prime
 }
 
 //For performance... Start by dividing by known small primes. If the number divides the primes, then it is not prime... (i.e. 9 % 3 = 0 so 9 is not prime)
@@ -49,4 +72,78 @@ fn div_small_primes(n: &BigUint) -> bool
     return true;
 }
 
-// Note to self. Right now this only finds primes sometimes - we still need to go through the rest of the cases from the lib...
+/*
+    To check n = 221 is prime, we randomly pick 1 < a < 220, and check if a^(n-1) = 1 mod n
+    If it holds, n is prime or a is a Fermat Liar. Then we take another a and test if  a^(n-1) mod n =/= 1
+    If such an a exists, so a^(n-1) =/= 1 mod n, n is not prime
+*/
+fn fermat_primality_test(n: &BigUint) -> bool
+{
+    let mut rng = rand::thread_rng();
+    let random_int = rng.gen_biguint_below(n);
+
+    let exp = n - BigUint::one();
+    let fermat_test = random_int.modpow(&exp, n);
+    return fermat_test == One::one();
+
+}
+
+//The below functions are copied from the lib - too complicated to understand for now...
+fn miller_rabin(candidate: &BigUint, limit: usize) -> bool {
+    //println!("Miller Attempt");
+    // One and Two in ramp::Int form
+    let one = BigUint::one();
+    let two = &one + &one;
+    
+    
+    let (d,s) = rewrite(&candidate);
+
+    let mut rng = rand::thread_rng();
+
+    for _i in 0..limit {
+        let a = rng.gen_biguint_range(&two, &(candidate-&one));
+        let mut x = a.modpow(&d, &candidate);
+
+        if x == one || x == (candidate - &one) {
+            continue;
+        }
+        else {
+            // Convert To Usizes For Loop
+            let step = s.sub(&one).to_usize().unwrap();
+            let one_usize = one.to_usize().unwrap();
+            
+            for _ in one_usize..step {
+                x = x.modpow(&two,candidate);
+                if x == BigUint::one() {
+                    return false
+                } 
+                else if x == (candidate - BigUint::one()) {
+                    break;
+                }
+            }
+            return false;
+        }
+    }
+    true
+}
+
+fn rewrite(n: &BigUint) -> (BigUint,BigUint) {
+    let one: BigUint = BigUint::one();
+    let two: BigUint = BigUint::one() + BigUint::one();
+    let mut i: BigUint = BigUint::zero();
+    
+    
+    
+
+    // (n-1) becomes even number
+    let mut d: BigUint = n - &one;
+
+    // The Main Loop That Checks Whether The Number is even and then divides by 2 and stores a counter 
+    while d.is_even() == true {
+        d /= &two;
+        i = i + &one;
+    }
+    return (d.clone(),i)
+}
+
+

@@ -7,6 +7,12 @@ use std::io::prelude::*;
 use std::fs;
 use std::fs::File;
 
+    /*
+        let p = BigUint::from(5u64);
+        let q = BigUint::from(11u64);
+        return(BigUint::from(7u64), BigUint::from(23u64), p*q);
+    */
+
 // Notes: https://github.com/rsarky/og-rsa/blob/master/src/lib.rs
 
 //(e, d, n)
@@ -46,19 +52,22 @@ fn obtain_key_pair() //-> KeySet
         println!("No keys were found - generating your keypair... This may take some time");
         let e = BigUint::from(65537u64); //hard coding e for now...
         
-        //This BigUInt is not the same as the other for some reason...
-        //let p = Generator::new_prime(512); //Returns a biguint. Key size should be 2048 - shorter for testing
-        //let q = Generator::new_prime(512);
-
-        //We need that p mod e =/= 1 and same for q - they have to be co-prime
+        let mut p = util::generate_primes(512);
         
-        /*if p % e == 1
+        //We need that p mod e =/= 1 and same for q - they have to be co-prime
+        while &p % &e == BigUint::from(1u64)
         {
+            p = util::generate_primes(512)
+        }
 
-        }*/
+        let mut q = util::generate_primes(512);
+        while &q % &e == BigUint::from(1u64)
+        {
+            q = util::generate_primes(512)
+        }
 
-        //let n = &p*&q;
-        //println!("n as generated: {}", n);
+        let n = &p*&q;
+        println!("n as generated: {}", n);
         
         //Compute the rest of the keypair from here...
 
@@ -66,36 +75,30 @@ fn obtain_key_pair() //-> KeySet
 
         /* An implementation of generating files and writing to them in Rust found on the internet */
 
-        /*let mut file = match File::create("keys.txt") 
+        let mut file = match File::create("keys.txt") 
         {
             Err(_) => panic!("Error while creating file for storing key pair... Terminating process"),
             Ok(key_file) => key_file
         };
     
-        match file.write_all(&n.to_bytes_be()) 
+        match file.write_all(b"&n.to_bytes_be()") 
         {
             Err(_) => panic!("Error while writing to key pair file... Terminating process"),
             Ok(_) => println!("Key fild was sucessfully created...")
-        };*/
+        };
 
 
         //This actually restores our n from the file!
 
-        let test = fs::read("keys.txt")
-        .expect("Couldnt read file.");
-        let test = BigUint::from_bytes_be(&test);
+        //let test = fs::read("keys.txt")
+        //.expect("Couldnt read file.");
+        //let test = BigUint::from_bytes_be(&test);
         
         //println!("n after reading from file: {}", test);
 
         //Write to the file: https://doc.rust-lang.org/std/fs/struct.File.html
     }
-
-    /*
-        let p = BigUint::from(5u64);
-        let q = BigUint::from(11u64);
-        return(BigUint::from(7u64), BigUint::from(23u64), p*q);
-    */
-    }
+}
 
 
 // c = m^e mod n
@@ -130,7 +133,7 @@ fn main() {
 
     //let key: KeySet = createKeyPair();
     //let message = get_msg();
-    //obtain_key_pair();
-    util::generate_primes(15);
+    obtain_key_pair();
+
 
 }
