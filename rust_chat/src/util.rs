@@ -7,6 +7,7 @@ use num::Integer;
 //use std::io::prelude::*;
 use core::ops::Sub;
 use num_traits::*;
+use num_bigint::*;
 
 //type PrimePair = (BigUint, BigUint);
 
@@ -145,5 +146,96 @@ fn rewrite(n: &BigUint) -> (BigUint,BigUint) {
     }
     return (d.clone(),i)
 }
+
+/*
+    TODO : Extended Euclidian Alorithm for computing multiplicative inverse, since d*e = 1 mod (p-1)(q-1) - d is modular inverse to e under mod (p-1)(q-1)
+    Check https://shirshak55.github.io/articles/gcd-in-rust/ or https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm
+    Create a test file and test the creating of keys - check that d is mod inverse of e!
+
+
+*/
+
+//
+fn mult_inverse_test(a: &BigUint, b: &BigUint) -> BigUint
+{
+    let mut s0: BigInt = Zero::zero(); //s0
+    let mut s1: BigInt = One::one(); //s1
+
+    let mut r0 = a.clone();
+    let mut r1 = b.clone();
+
+    while r1 != Zero::zero()
+    {
+        let r2 = &r0 - (&r0 / &r1) * &r1;
+        let s2 = &s0 - BigInt::from_biguint(Sign::Plus, &r0/&r1) * &s1;
+        r0 = r1;
+        r1 = r2;
+        s0 = s1;
+        s1 = s2;
+    }
+
+    while s0 < Zero::zero()
+    {
+        s0 = s0 + BigInt::from_biguint(Sign::Plus, a.clone());
+    }
+    return s0.to_biguint().expect("Error in conversion between signed and unsigned int of modular inverse");
+
+}
+
+#[cfg(test)]
+mod tests
+{
+    use super::*;
+    #[test]
+    fn trivial()
+    {
+        assert_eq!(1+1, 2);
+    }
+
+    #[test]
+    fn prime_not_even()
+    {
+        assert_ne!(generate_primes(16) % BigUint::from(2u32), Zero::zero());
+    }
+    
+    #[test]
+    fn test_mult_inverse_toy_example()
+    {
+        let p = BigUint::from(5u64);
+        let q = BigUint::from(11u64);
+        let euler = (p - BigUint::from(1u32)) * (q-BigUint::from(1u32));
+        let e = BigUint::from(7u64);
+        let d = mult_inverse_test(&euler, &e);
+        assert_eq!(d, BigUint::from(23u64));
+    }
+
+    //Generate random correct primes, and check that the modular inverse indeed is correct - this test indicates that key generation is correct
+    #[test]
+    fn test_mult_inverse()
+    {
+        let e = BigUint::from(65537u64); //hard coding e for now...
+        
+        let mut p = generate_primes(512);
+        
+        //We need that p mod e =/= 1 and same for q - they have to be co-prime
+        while &p % &e == BigUint::from(1u64)
+        {
+            p = generate_primes(512)
+        }
+
+        let mut q = generate_primes(512);
+        while &q % &e == BigUint::from(1u64)
+        {
+            q = generate_primes(512)
+        }
+
+        let euler = (&p - BigUint::from(1u32)) * (&q-BigUint::from(1u32));
+        let d = mult_inverse_test(&euler, &e);
+        assert_eq!(e*d % euler, BigUint::from(1u32));
+
+    }
+
+}
+
 
 
