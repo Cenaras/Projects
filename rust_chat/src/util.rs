@@ -156,7 +156,7 @@ fn rewrite(n: &BigUint) -> (BigUint,BigUint) {
 */
 
 //
-fn mult_inverse_test(a: &BigUint, b: &BigUint) -> BigUint
+pub fn mult_inverse(a: &BigUint, b: &BigUint) -> BigUint
 {
     let mut s0: BigInt = Zero::zero(); //s0
     let mut s1: BigInt = One::one(); //s1
@@ -205,7 +205,7 @@ mod tests
         let q = BigUint::from(11u64);
         let euler = (p - BigUint::from(1u32)) * (q-BigUint::from(1u32));
         let e = BigUint::from(7u64);
-        let d = mult_inverse_test(&euler, &e);
+        let d = mult_inverse(&euler, &e);
         assert_eq!(d, BigUint::from(23u64));
     }
 
@@ -230,7 +230,7 @@ mod tests
         }
 
         let euler = (&p - BigUint::from(1u32)) * (&q-BigUint::from(1u32));
-        let d = mult_inverse_test(&euler, &e);
+        let d = mult_inverse(&euler, &e);
         assert_eq!(e*d % euler, BigUint::from(1u32));
 
     }

@@ -1,11 +1,14 @@
 mod util;
 
+
+
 use std::io;
 use num_bigint::BigUint;
 use std::path::Path;
 use std::io::prelude::*;
 use std::fs;
 use std::fs::File;
+
 
     /*
         let p = BigUint::from(5u64);
@@ -15,14 +18,47 @@ use std::fs::File;
 
 // Notes: https://github.com/rsarky/og-rsa/blob/master/src/lib.rs
 
-//(e, d, n)
-type KeySet = (BigUint, BigUint, BigUint);
+
+struct KeySet {
+    e: BigUint,
+    d: BigUint,
+    n: BigUint,
+}
+
+
+impl KeySet
+{
+    pub fn to_string(&self) -> String
+    {
+        format!("{} {} {}", self.e.to_str_radix(10), self.d.to_str_radix(10), self.n.to_str_radix(10))
+    }
+}
+
+        //This actually restores our n from the file!
+
+        //let test = fs::read("keys.txt")
+        //.expect("Couldnt read file.");
+        //let test = BigUint::from_bytes_be(&test);
+        
+        //println!("Keys after reading from file: {}", test);
+
+        //Write to the file: https://doc.rust-lang.org/std/fs/struct.File.html
+fn read_key(filename: &str) -> KeySet
+{
+    let contents = fs::read_to_string(filename).expect("Error while reading key file - if this persists try to delete the file and obtain new keypair");
+    let contents: Vec<&[u8]> = contents.split(' ').map(|x| x.as_bytes()).collect();
+
+    let e = BigUint::parse_bytes(contents[0], 10).expect("Error while reading key");
+    let d = BigUint::parse_bytes(contents[1], 10).expect("Error while reading key");
+    let n = BigUint::parse_bytes(contents[2], 10).expect("Error while reading key");
+    KeySet{e, d, n}
+
+}
+
 
 /* TO DO
-    - Generate key pairs
     - Store them in readable file if non-existing
     - Read keypair from file, if existing
-
 
 */
     /*
@@ -32,7 +68,6 @@ type KeySet = (BigUint, BigUint, BigUint);
 
 
 
-//A lot here works, when p and q are the correct type. Just uncomment again... Working on getting correct primes rn.
 fn obtain_key_pair() //-> KeySet
 {
 
@@ -67,13 +102,21 @@ fn obtain_key_pair() //-> KeySet
         }
 
         let n = &p*&q;
+        let euler = (p - BigUint::from(1u32)) * (q - BigUint::from(1u32));
         println!("n as generated: {}", n);
         
-        //Compute the rest of the keypair from here...
 
+        let d: BigUint = util::mult_inverse(&euler, &e);
 
+        let key_set = KeySet {e, d, n}; //Maybe run a validation test on the keyset?
+        println!("Current keyset: {}\n{}\n{}", key_set.e, key_set.d, key_set.n);
 
         /* An implementation of generating files and writing to them in Rust found on the internet */
+
+        // Test conversion from struct to bytes and back with writing and reading from file...
+
+        let test = key_set.to_string();
+        let key_set_string = test.as_bytes();
 
         let mut file = match File::create("keys.txt") 
         {
@@ -81,22 +124,11 @@ fn obtain_key_pair() //-> KeySet
             Ok(key_file) => key_file
         };
     
-        match file.write_all(b"&n.to_bytes_be()") 
+        match file.write_all(key_set_string) //before: b"&n.to_bytes_be()" 
         {
             Err(_) => panic!("Error while writing to key pair file... Terminating process"),
             Ok(_) => println!("Key fild was sucessfully created...")
         };
-
-
-        //This actually restores our n from the file!
-
-        //let test = fs::read("keys.txt")
-        //.expect("Couldnt read file.");
-        //let test = BigUint::from_bytes_be(&test);
-        
-        //println!("n after reading from file: {}", test);
-
-        //Write to the file: https://doc.rust-lang.org/std/fs/struct.File.html
     }
 }
 
@@ -131,9 +163,29 @@ fn main() {
     
     //println!("Enter a message:");
 
-    //let key: KeySet = createKeyPair();
     //let message = get_msg();
     obtain_key_pair();
 
+
+}
+
+#[cfg(test)]
+mod tests
+{
+    use super::*;
+    #[test]
+    fn test_enc_dec()
+    {
+        let p = BigUint::from(5u64);
+        let q = BigUint::from(11u64);
+        let n = &p*&q;
+        let e = BigUint::from(7u64);
+        let d = BigUint::from(23u64);
+        let message = BigUint::from(8u64);
+
+        assert_eq!(encrypt(&message, &n, &e), BigUint::from(2u64));
+        assert_eq!(decrypt(&encrypt(&message, &n, &e), &n, &d), message);
+
+    }
 
 }
