@@ -8,16 +8,67 @@ use std::path::Path;
 use std::io::prelude::*;
 use std::fs;
 use std::fs::File;
-
-
-    /*
-        let p = BigUint::from(5u64);
-        let q = BigUint::from(11u64);
-        return(BigUint::from(7u64), BigUint::from(23u64), p*q);
-    */
+use std::thread;
+use std::net::{TcpListener, TcpStream, Shutdown};
+use std::env;
 
 // Notes: https://github.com/rsarky/og-rsa/blob/master/src/lib.rs
 
+/* ########### CLIENT-SERVER PART ###########*/
+
+fn handle_connection(mut conn: TcpStream) //This needs reworking - this is just the template for TCP echo servers (we simply write w/e is in the buffer)
+{
+    let mut buf = [0, 50];
+    while match conn.read(&mut buf)
+    {
+        Ok(size) => 
+        {
+            conn.write(&buf).unwrap();
+            true
+        }
+
+        Err(e) => 
+        {
+            println!("Error occurred from connection {}: {}", conn.peer_addr().unwrap(), e);
+            conn.shutdown(Shutdown::Both).unwrap();
+            false
+        }
+    } {}
+}
+
+fn listen_for_connections(port: &String)
+{
+    let mut address: String = "127.0.0.1:".to_owned();
+    address.push_str(port);
+    let listener = TcpListener::bind(address).unwrap();
+    for connections in listener.incoming()
+    {
+        match connections
+        {
+            Ok(conn) => 
+            {
+                println!("Connection inbound from {}", conn.peer_addr().unwrap());
+                thread::spawn(move|| {handle_connection(conn);}); //Spawn new thread to handle the TCP connection
+            }
+
+            Err(e) =>
+            {
+                println!("Error occured while listening for connection: {}", e);
+            }
+
+        }
+    }
+    
+}
+
+fn connect_to_client()
+{
+
+}
+
+
+
+/* ########### RSA PART ###########*/
 
 struct KeySet {
     e: BigUint,
@@ -30,19 +81,12 @@ impl KeySet
 {
     pub fn to_string(&self) -> String
     {
-        format!("{} {} {}", self.e.to_str_radix(10), self.d.to_str_radix(10), self.n.to_str_radix(10))
+        format!("{} {} {}", self.e.to_str_radix(10), self.d.to_str_radix(10), self.n.to_str_radix(10)) //Return the 
     }
 }
 
-        //This actually restores our n from the file!
 
-        //let test = fs::read("keys.txt")
-        //.expect("Couldnt read file.");
-        //let test = BigUint::from_bytes_be(&test);
-        
-        //println!("Keys after reading from file: {}", test);
-
-        //Write to the file: https://doc.rust-lang.org/std/fs/struct.File.html
+//Add error handling if file format is not correct
 fn read_key(filename: &str) -> KeySet
 {
     let contents = fs::read_to_string(filename).expect("Error while reading key file - if this persists try to delete the file and obtain new keypair");
@@ -56,19 +100,8 @@ fn read_key(filename: &str) -> KeySet
 }
 
 
-/* TO DO
-    - Store them in readable file if non-existing
-    - Read keypair from file, if existing
-
-*/
-    /*
-        n = p*q
-        d = e^-1 mod (p-1 * q-1)
-    */  
-
-
-
-fn obtain_key_pair() //-> KeySet
+//Either return the key when generating it and when reading or something else...
+fn obtain_key_pair() -> KeySet
 {
 
     /*
@@ -81,6 +114,7 @@ fn obtain_key_pair() //-> KeySet
     if Path::new("keys.txt").exists()
     {
         println!("File exists"); //Report that file indeed exists
+        return read_key("keys.txt");
     }
     else
     {
@@ -113,8 +147,6 @@ fn obtain_key_pair() //-> KeySet
 
         /* An implementation of generating files and writing to them in Rust found on the internet */
 
-        // Test conversion from struct to bytes and back with writing and reading from file...
-
         let test = key_set.to_string();
         let key_set_string = test.as_bytes();
 
@@ -129,6 +161,8 @@ fn obtain_key_pair() //-> KeySet
             Err(_) => panic!("Error while writing to key pair file... Terminating process"),
             Ok(_) => println!("Key fild was sucessfully created...")
         };
+
+        return key_set;
     }
 }
 
@@ -148,23 +182,42 @@ fn decrypt(c: &BigUint, n: &BigUint, d: &BigUint) -> BigUint
 /*
     Reads a string from the command line, and converts it to a BigUInt representataion, which then can be passed to the encrypt function
 */
-//Should not take these arguments - just used for testing!
-fn get_msg() -> BigUint
+
+// Convert the raw message to BigUInt prepresentation
+fn msg_to_int(msg: String) -> BigUint
+{
+    return BigUint::from_bytes_be(msg.as_bytes()); 
+} 
+
+fn get_raw_msg() -> String
 {
     //Creates a string, reads cmd line and stores in string.
     let mut message = String::new();
     io::stdin().read_line(&mut message).expect("Failed to read line");
-    
-    //Converts the message to a byte array, and from that converts it to a biguint representation of the byte array
-    return BigUint::from_bytes_be(message.as_bytes()); 
+    return message
 }
+
+/*
+    Notes: Allow to listen for connections
+    Command line argument to say who we want to connect to
+    Actually create a TCP Stream Connection
+*/
 
 fn main() {
     
-    //println!("Enter a message:");
+    //Obtain arguments - either listen for incomming connections or connect to server
+    let args: Vec<String> = env::args().collect();
+    if args[0] == "listen"
+    {
+        listen_for_connections(&args[1])
+    }
+    if args[0] == "connect" {connect_to_client()}
 
+    //println!("Enter a message:");
     //let message = get_msg();
-    obtain_key_pair();
+    let client_key_set = obtain_key_pair(); //Obtain / Generate the key set from the client.
+    println!("Something something we need a connection");
+
 
 
 }
