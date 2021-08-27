@@ -1,16 +1,18 @@
 mod util;
 
-
-
 use std::io;
 use num_bigint::BigUint;
 use std::path::Path;
 use std::io::prelude::*;
 use std::fs;
 use std::fs::File;
+
 use std::thread;
 use std::net::{TcpListener, TcpStream, Shutdown};
 use std::env;
+use std::str::from_utf8;
+use std::io::{Read, Write};
+
 
 // Notes: https://github.com/rsarky/og-rsa/blob/master/src/lib.rs
 
@@ -18,12 +20,12 @@ use std::env;
 
 fn handle_connection(mut conn: TcpStream) //This needs reworking - this is just the template for TCP echo servers (we simply write w/e is in the buffer)
 {
-    let mut buf = [0, 50];
+    let mut buf = [0 as u8, 50];
     while match conn.read(&mut buf)
     {
         Ok(size) => 
         {
-            conn.write(&buf).unwrap();
+            conn.write(&buf[0..size]).unwrap();
             true
         }
 
@@ -38,7 +40,7 @@ fn handle_connection(mut conn: TcpStream) //This needs reworking - this is just 
 
 fn listen_for_connections(port: &String)
 {
-    let mut address: String = "127.0.0.1:".to_owned();
+    let mut address: String = "localhost:".to_owned();
     address.push_str(port);
     let listener = TcpListener::bind(address).unwrap();
     for connections in listener.incoming()
@@ -61,9 +63,48 @@ fn listen_for_connections(port: &String)
     
 }
 
-fn connect_to_client()
+fn connect_to_client(port: &String)
 {
+    let mut address: String = "localhost:".to_owned();
+    address.push_str(port);
+    match TcpStream::connect(address)
+    {
+        Ok(mut conn) => 
+        { //get msg, enc and send
+            println!("Successfully connected to server in port 3333");
 
+            let msg = b"Hello!";
+
+            conn.write(msg).unwrap();
+            println!("Sent Hello, awaiting reply...");
+
+            let mut data = [0 as u8; 6]; // using 6 byte buffer
+            match conn.read_exact(&mut data) 
+            {
+                Ok(_) => 
+                {
+                    if &data == msg 
+                    {
+                        println!("Reply is ok!");
+                    } 
+                    else 
+                    {
+                        let text = from_utf8(&data).unwrap();
+                        println!("Unexpected reply: {}", text);
+                    }
+                },
+                Err(e) => 
+                {
+                    println!("Failed to receive data: {}", e);
+                }
+            }
+        },
+        Err(e) => 
+        {
+            println!("Failed to connect: {}", e);
+        }
+    }
+    println!("Terminated.");
 }
 
 
@@ -203,22 +244,25 @@ fn get_raw_msg() -> String
     Actually create a TCP Stream Connection
 */
 
-fn main() {
+fn main() -> std::io::Result<()> 
+{
     
     //Obtain arguments - either listen for incomming connections or connect to server
     let args: Vec<String> = env::args().collect();
-    if args[0] == "listen"
+    if args[1].trim() == "listen" //args[0] is path, 1 is first argument etc...
     {
-        listen_for_connections(&args[1])
+        //println!("Listening for connections");
+        listen_for_connections(&args[2])
     }
-    if args[0] == "connect" {connect_to_client()}
-
+    else if args[1].trim() == "connect" 
+    {
+        //println!("Connecting to peer");
+        connect_to_client(&args[2])
+    }
     //println!("Enter a message:");
     //let message = get_msg();
     let client_key_set = obtain_key_pair(); //Obtain / Generate the key set from the client.
-    println!("Something something we need a connection");
-
-
+    Ok(())
 
 }
 
