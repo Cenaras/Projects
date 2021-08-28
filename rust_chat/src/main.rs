@@ -17,7 +17,7 @@ use std::io::{Read, Write};
 // Notes: https://github.com/rsarky/og-rsa/blob/master/src/lib.rs
 // Client-Server: https://github.com/tensor-programming/Rust_client-server_chat/blob/master/chat/client/src/main.rs
 
-// NOTE: Project undone - lost interest after TCP part...
+// NOTE: Project undone - lost interest after TCP part... Too much copy-paste code
 
 
 /* ########### CLIENT-SERVER PART ###########*/
