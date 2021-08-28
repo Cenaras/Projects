@@ -55,3 +55,4 @@ dkms.conf
 
 #Misc
 keys.txt
+.env
