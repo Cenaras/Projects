@@ -3,7 +3,7 @@ import discord #https://discordpy.readthedocs.io/en/latest/api.html
 from dotenv import load_dotenv
 import random
 from discord.ext import commands
-
+import requests
 
 #Video guide: https://www.youtube.com/watch?v=SPTfmiYiuok&list=WL&index=52&t=186s
 # For database: https://www.geeksforgeeks.org/python-mysql-create-database/
@@ -18,25 +18,24 @@ bot = commands.Bot(command_prefix='!')
 
 '''
     Ideas:
-     - !builds name -> link smite.guru build page
      - !set roles -> store what roles the user wants to play
      - !roles/!god -> return what role/god to play (take roles stored into account) - also allow to specify list from wanted roles
-     - !quotes -> display a funny quote said by the members
+
      - Interaction med Smite API somehow?
      - Gif stuff: Post a random gif of selected favourites (use !addgif to safe favourite gifs and then a link)
-    Make functions a map from command name to its function - getattr to do this
-        Use this to simplify "message to command" detection (just message \in keys(map) -> call(value)) - Doesn't work cause of arguments!!!
+
     Help command, display LSH of map from commands
-    - !wiki xxx -> osrs wiki
+     - !wiki xxx -> osrs wiki
      - !addcommand [name] [video]
 
 '''
 
-quotes = [  "\"Aerodynamik er lidt ligesom pik... Jeg elsker det\" - CandrCry", 
+quotes = [  "\"Aerodynamik er lidt ligesom pik... Jeg elsker det\" - CandyCry", 
             "\"Hvor fuck er min mur, hvor FUCK er min MUR, HVOR FUCK ER MIN MUR LIGE NU?!!\" - Kasserne",
             "\"I'm not gonna make this...\" - Extranjero",
-            "\"Chang'e ult NEDE\" - Bisget"
-            
+            "\"Chang'e ult NEDE\" - Bisget",
+            "\"Fucking rat ass racoon dog looking motherfucker\" - Sir Jason Chayse",
+            "\"Kasper - Shut the flying!\" - Extranjero"
          ]
 
 
@@ -55,17 +54,8 @@ async def on_message(message):
         #Send the message, wait for it to return
         await message.channel.send((("Hello {}").format(message.author).split("#", 1)[0]) + "!") #Get usrname, remove #xxxx part and append "!" at the end
     
-    '''if msg_content.startswith("!quotes"):
-        # Allow argument to get quote from specific user
-        msg_len = len(msg_content.split(" ")) 
-        if msg_len > 1:
-            person = msg_content.split(" ")[1]
-            # print(person) ONLY SELECT QUOTES FROM THIS PERSON - Check quotes after '-' and only select them...
-            print(msg_content)
-        await message.channel.send(random.choice(quotes))
-    '''
-
-
+    
+### !quotes -> display a funny quote said by the members ###
 @bot.command(name='quotes', help = "Displays a funny quote from a NuCow member")
 async def show_quote(context, *args):
     if len(args) == 0:
@@ -77,12 +67,25 @@ async def show_quote(context, *args):
         person = args[0].lower()
 
         for cand in quotes:
-            if person in cand:
+            lower_cand = cand.lower()
+            if person in lower_cand:
                 candidate_quotes.append(cand)
         if len(candidate_quotes) == 0:  #Proper error handling...
             await context.send("No quote from given person...")
         else:
             await context.send(random.choice(candidate_quotes))
 
+
+
+### !build name -> link smite.guru build page ###
+@bot.command(name='build', help = "Link a SmiteGuru page with a build of the specified god. Specify a god, i.e. '!build rama'")
+async def show_builds(context):
+    god = context.message.content.split(" ")[1]
+    baselink = "https://smite.guru/builds/"
+    r = requests.head(baselink+god) #Get request
+    if (r.status_code != 200): #The requested god build is not valid on the page - i.e. not status 200 (HTTP OK)
+        await context.send("https://smite.guru/builds?search="+god)
+    else:
+        await context.send(baselink+god) #Else actually display the build page
 
 bot.run(TOKEN) #Run the bot with the given token - binds our program to our bot
