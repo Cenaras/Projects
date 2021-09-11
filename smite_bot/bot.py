@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import random
 from discord.ext import commands
 import requests
+from requests.models import Response
 
 #Video guide: https://www.youtube.com/watch?v=SPTfmiYiuok&list=WL&index=52&t=186s
 # For database: https://www.geeksforgeeks.org/python-mysql-create-database/
@@ -35,7 +36,8 @@ quotes = [  "\"Aerodynamik er lidt ligesom pik... Jeg elsker det\" - CandyCry",
             "\"I'm not gonna make this...\" - Extranjero",
             "\"Chang'e ult NEDE\" - Bisget",
             "\"Fucking rat ass racoon dog looking motherfucker\" - Sir Jason Chayse",
-            "\"Kasper - Shut the flying!\" - Extranjero"
+            "\"Kasper - Shut the flying!\" - Extranjero", 
+            "\"Er der friendly fire? Giv ham lige et lille love-tap bagi\" - Sir Jason Chayse",
          ]
 
 
@@ -88,4 +90,21 @@ async def show_builds(context):
     else:
         await context.send(baselink+god) #Else actually display the build page
 
+
+### !wiki search -> open osrs wiki with term
+@bot.command(name='wiki', help = "Search the osrs wiki, with a specific term")
+async def display_wiki(context):
+    term = ""
+    terms = context.message.content.split(" ")
+    for i in range (1, len(terms)):
+        term = term+terms[i] + "_"
+
+    term = term[:-1]
+
+    baselink = "https://oldschool.runescape.wiki/w/"
+    content = requests.get(baselink+term).text
+    if ("This page doesn&#039;t exist on the wiki. Maybe it should?" in content):
+        await context.send("The requested page does not exist on the old school wiki page")
+    else:
+        await context.send(baselink+term)
 bot.run(TOKEN) #Run the bot with the given token - binds our program to our bot
