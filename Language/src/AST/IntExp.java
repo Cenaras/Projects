@@ -11,4 +11,8 @@ public class IntExp extends Exp {
     public int eval() {
         return value;
     }
+
+    public String toString() {
+        return "IntExp(" + value + ")";
+    }
 }

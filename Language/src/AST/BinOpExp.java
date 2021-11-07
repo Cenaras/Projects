@@ -4,13 +4,6 @@ import Exceptions.IllegalArithmeticException;
 
 public class BinOpExp extends Exp {
 
-    public enum Operator {
-        PLUS,
-        MINUS,
-        TIMES,
-        DIVIDE
-    }
-
     Exp left;
     String op;
     Exp right;
@@ -45,4 +38,9 @@ public class BinOpExp extends Exp {
         }
         return result;
     }
+
+    public String toString() {
+        return "BinOpExp(" + left.toString() + ", " + op + ", " + right.toString() + ")";
+    }
+
 }

@@ -4,11 +4,12 @@ import AST.*;
 public class  Parser implements ParserConstants {
     public static void main(String[] args) {
                      try {
-                         new Parser(new java.io.StringReader(args[0])).S();
-                         System.out.println("Syntax is okay");
+                         Exp result = new Parser(new java.io.StringReader(args[0])).S(); //Read the program from cmd line and parse with S() as start
+                         System.out.println(result); //Print result of parsing
                      } catch (Throwable e) {
                          // Catching Throwable is ugly but JavaCC throws Error objects!
                          System.out.println("Syntax check failed: " + e.getMessage());
+                         e.printStackTrace();
                      }
                  }
 
@@ -27,7 +28,7 @@ public class  Parser implements ParserConstants {
           Exp e;
     e = Exp();
     jj_consume_token(0);
-                     {if (true) return e;}
+                      {if (true) return e;}
     throw new Error("Missing return statement in function");
   }
 
@@ -47,14 +48,15 @@ public class  Parser implements ParserConstants {
       }
       op = OpLvlOne();
       e2 = Term();
+                                               e1 = new BinOpExp(e1, op, e2);
     }
-                                                 {if (true) return new BinOpExp(new IntExp(1), "PLUS", new IntExp(1));}
+      {if (true) return e1;}
     throw new Error("Missing return statement in function");
   }
 
   static final public Exp Term() throws ParseException {
-             Exp e1; Exp e2;
-    Literal();
+             Exp e1; String op; Exp e2;
+    e1 = Literal();
     label_2:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -66,10 +68,11 @@ public class  Parser implements ParserConstants {
         jj_la1[1] = jj_gen;
         break label_2;
       }
-      OpLvlTwo();
-      Literal();
+      op = OpLvlTwo();
+      e2 = Literal();
+                                                     e1 = new BinOpExp(e1, op, e2);
     }
-                                        {if (true) return new IntExp(1);}
+      {if (true) return e1;}
     throw new Error("Missing return statement in function");
   }
 
@@ -85,10 +88,11 @@ public class  Parser implements ParserConstants {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case TIMES:
       op = jj_consume_token(TIMES);
+                   {if (true) return op.image;}
       break;
     case DIVIDE:
       op = jj_consume_token(DIVIDE);
-                                   {if (true) return op.image;}
+                      {if (true) return op.image;}
       break;
     default:
       jj_la1[2] = jj_gen;
@@ -103,10 +107,11 @@ public class  Parser implements ParserConstants {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case PLUS:
       op = jj_consume_token(PLUS);
+                 {if (true) return op.image;}
       break;
     case MINUS:
       op = jj_consume_token(MINUS);
-                                 {if (true) return op.image;}
+                     {if (true) return op.image;}
       break;
     default:
       jj_la1[3] = jj_gen;

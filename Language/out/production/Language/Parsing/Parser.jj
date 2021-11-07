@@ -4,11 +4,12 @@ import AST.*;
 public class  Parser {
     public static void main(String[] args) {
                      try {
-                         new Parser(new java.io.StringReader(args[0])).S();
-                         System.out.println("Syntax is okay");
+                         Exp result = new Parser(new java.io.StringReader(args[0])).S(); //Read the program from cmd line and parse with S() as start
+                         System.out.println(result); //Print result of parsing
                      } catch (Throwable e) {
                          // Catching Throwable is ugly but JavaCC throws Error objects!
                          System.out.println("Syntax check failed: " + e.getMessage());
+                         e.printStackTrace();
                      }
                  }
 }
@@ -44,16 +45,18 @@ SKIP : {
 
 Exp S(): {Exp e;}
 {
-    e = Exp() <EOF> {return e;} //correct
+    e = Exp() <EOF> { return e; } //correct
 }
 Exp Exp(): {Exp e1; String op; Exp e2;}
 {
-    e1 = Term() (op = OpLvlOne() e2 = Term())* { return new BinOpExp(new IntExp(1), "PLUS", new IntExp(1));} //Wrong, need to handle "* = 0" case
+    e1 = Term() (op = OpLvlOne() e2 = Term() { e1 = new BinOpExp(e1, op, e2); } )*
+    { return e1;} //We only overwrite e1, if the Kleene-Star is taken. If it is, e1 is the new expression, if not, we keep e1 as the first term
 }
 
-Exp Term(): {Exp e1; Exp e2;}
+Exp Term(): {Exp e1; String op; Exp e2;}
 {
-    Literal() (OpLvlTwo() Literal())* { return new IntExp(1); } //wrong, testing
+    e1 = Literal() ( op = OpLvlTwo() e2 = Literal() {e1 = new BinOpExp(e1, op, e2); } )*
+    { return e1; } //wrong, testing
 }
 
 Exp Literal(): {Token lit;}
@@ -63,11 +66,13 @@ Exp Literal(): {Token lit;}
 
 String OpLvlTwo(): {Token op;}
 {
-    op = <TIMES> | op = <DIVIDE> { return op.image; } //think correct
+    op = <TIMES> { return op.image; }
+    | op = <DIVIDE> { return op.image; } //think correct
 }
 
 String OpLvlOne(): {Token op;}
 {
-    op = <PLUS> | op = <MINUS> { return op.image; } //think correct
+    op = <PLUS> {return op.image; }
+    | op = <MINUS> { return op.image; } //think correct
 }
 
