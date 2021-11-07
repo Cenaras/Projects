@@ -12,10 +12,10 @@ public class BinOpExp extends Exp {
     }
 
     Exp left;
-    Operator op;
+    String op;
     Exp right;
 
-    public BinOpExp(Exp left, Operator op, Exp right) {
+    public BinOpExp(Exp left, String op, Exp right) {
         this.left = left;
         this.op = op;
         this.right = right;
@@ -26,16 +26,16 @@ public class BinOpExp extends Exp {
         int rightEval = right.eval();
         int result = 0;
         switch (this.op) {
-            case PLUS:
+            case "PLUS":
                 result = leftEval + rightEval;
                 break;
-            case MINUS:
+            case "MINUS":
                 result = leftEval - rightEval;
                 break;
-            case TIMES:
+            case "TIMES":
                 result = leftEval * rightEval;
                 break;
-            case DIVIDE:
+            case "DIVIDE":
                 if (rightEval != 0) {
                     result = leftEval / rightEval;
                     break;

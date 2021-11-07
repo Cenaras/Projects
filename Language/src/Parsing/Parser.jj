@@ -1,5 +1,6 @@
 PARSER_BEGIN(Parser)
 package Parsing;
+import AST.*;
 public class  Parser {
     public static void main(String[] args) {
                      try {
@@ -31,16 +32,42 @@ SKIP : {
 }
 //NOTES: javacc Lexing.jj, javac *.java afterwards. Add "package Lexing;" to files if it dissapears - or remove stuff from the package if it bothers you.
 /*  PARSER AND GRAMMAR GOES HERE */
-
+// int Exp(): {int x: x = T() (<PLUS> T())*; ret x}
 //2 + 3
 /*
 * EXP, EOF
 * EXP: T() + T()
 * 2 + 3: EXP: T() + T()
 */
+//Still requires to fix the returns of everything before generating the AST...
+//Code is tests, needs to be fixed
 
-void S(): {} { Exp() <EOF> }
-void Exp(): {} { T() (<PLUS> T())* }
-void T(): {} { F() (<TIMES> F())* }
-void F(): {} { <INT> }
-// int Exp(): {int x: x = T() (<PLUS> T())*; ret x}
+Exp S(): {Exp e;}
+{
+    e = Exp() <EOF> {return e;} //correct
+}
+Exp Exp(): {Exp e1; String op; Exp e2;}
+{
+    e1 = Term() (op = OpLvlOne() e2 = Term())* { return new BinOpExp(new IntExp(1), "PLUS", new IntExp(1));} //Wrong, need to handle "* = 0" case
+}
+
+Exp Term(): {Exp e1; Exp e2;}
+{
+    Literal() (OpLvlTwo() Literal())* { return new IntExp(1); } //wrong, testing
+}
+
+Exp Literal(): {Token lit;}
+{
+    lit = <INT> {return new IntExp(Integer.parseInt(lit.image));} //correct
+}
+
+String OpLvlTwo(): {Token op;}
+{
+    op = <TIMES> | op = <DIVIDE> { return op.image; } //think correct
+}
+
+String OpLvlOne(): {Token op;}
+{
+    op = <PLUS> | op = <MINUS> { return op.image; } //think correct
+}
+
