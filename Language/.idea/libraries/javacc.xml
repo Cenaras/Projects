@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="javacc">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../../../Libraries/javacc-javacc-7.0.10/bootstrap/javacc.jar!/" />
+      <root url="file://$PROJECT_DIR$/../../../Libraries/javacc-javacc-7.0.10/target" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <jarDirectory url="file://$PROJECT_DIR$/../../../Libraries/javacc-javacc-7.0.10/target" recursive="false" />
+  </library>
+</component>

@@ -1,0 +1,46 @@
+PARSER_BEGIN(Parser)
+package Parsing;
+public class  Parser {
+    public static void main(String[] args) {
+                     try {
+                         new Parser(new java.io.StringReader(args[0])).S();
+                         System.out.println("Syntax is okay");
+                     } catch (Throwable e) {
+                         // Catching Throwable is ugly but JavaCC throws Error objects!
+                         System.out.println("Syntax check failed: " + e.getMessage());
+                     }
+                 }
+}
+PARSER_END(Parser)
+
+//ADD MORE STUFF HERE
+TOKEN : {
+    < INT : (["0"-"9"])+ >
+    | < PLUS : "+" >
+    | < MINUS : "-" >
+    | < TIMES : "*" >
+    | < DIVIDE : "/" >
+
+}
+
+//INTEGRATE COMMENTS HERE
+SKIP : {
+    " "
+    |"\n"
+    | "\t"
+}
+//NOTES: javacc Lexing.jj, javac *.java afterwards. Add "package Lexing;" to files if it dissapears - or remove stuff from the package if it bothers you.
+/*  PARSER AND GRAMMAR GOES HERE */
+
+//2 + 3
+/*
+* EXP, EOF
+* EXP: T() + T()
+* 2 + 3: EXP: T() + T()
+*/
+
+void S(): {} { Exp() <EOF> }
+void Exp(): {} { T() (<PLUS> T())* }
+void T(): {} { F() (<TIMES> F())* }
+void F(): {} { <INT> }
+
