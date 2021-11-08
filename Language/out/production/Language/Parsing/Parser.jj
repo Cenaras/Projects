@@ -4,7 +4,9 @@ import AST.*;
 public class  Parser {
     public static void main(String[] args) {
                      try {
-                         Exp result = new Parser(new java.io.StringReader(args[0])).S(); //Read the program from cmd line and parse with S() as start
+                         ASTNode result = new Parser(new java.io.StringReader(args[0])).S(); //Read the program from cmd line and parse with S() as start
+                         //new Parser(new java.io.StringReader(args[0])).S();
+                         System.out.println("Syntax is parsed, AST generated:");
                          System.out.println(result); //Print result of parsing
                      } catch (Throwable e) {
                          // Catching Throwable is ugly but JavaCC throws Error objects!
@@ -18,56 +20,60 @@ PARSER_END(Parser)
 //ADD MORE STUFF HERE
 TOKEN : {
     < INT : (["0"-"9"])+ >
+    | < LET : "let" >
+    | < ID : (["a"-"z"](["A"-"Z"])*)+ >
     | < PLUS : "+" >
     | < MINUS : "-" >
     | < TIMES : "*" >
     | < DIVIDE : "/" >
+    | < SEMICOLON : ";" >
+    | < ASSIGNEQ : "=" >
 
 }
-
+/*TODO: ADD PROPER DOCUMENTATION FOR THIS. ALSO ADD TEST PROGRAMS AND COMPARISIONS FOR THEM*/
 //INTEGRATE COMMENTS HERE
 SKIP : {
     " "
-    |"\n"
+    | "\n"
     | "\t"
+    | "\r"
 }
 //NOTES: javacc Lexing.jj, javac *.java afterwards. Add "package Lexing;" to files if it dissapears - or remove stuff from the package if it bothers you.
-/*  PARSER AND GRAMMAR GOES HERE */
-// int Exp(): {int x: x = T() (<PLUS> T())*; ret x}
-//2 + 3
-/*
-* EXP, EOF
-* EXP: T() + T()
-* 2 + 3: EXP: T() + T()
-*/
-//Still requires to fix the returns of everything before generating the AST...
-//Code is tests, needs to be fixed
 
-Exp S(): {Exp e;}
+/*  PARSER AND GRAMMAR GOES HERE */
+//< LET > <ID > < ASSIGNEQ > <INT>
+
+ASTNode S(): {Exp e; Stm s;}
 {
-    e = Exp() <EOF> { return e; } //correct
+    e = Exp() <EOF> { return e; }
+    | s = Stm() <EOF> { return s; }
 }
 Exp Exp(): {Exp e1; String op; Exp e2;}
 {
-    e1 = Term() (op = OpLvlOne() e2 = Term() { e1 = new BinOpExp(e1, op, e2); } )*
-    { return e1;} //We only overwrite e1, if the Kleene-Star is taken. If it is, e1 is the new expression, if not, we keep e1 as the first term
+    e1 = Term() (op = OpLvlOne() e2 = Term() { e1 = new BinOpExp(e1, op, e2); } )* //We only overwrite e1, if the Kleene-Star is taken. If it is, e1 is the new expression, if not, we keep e1 as the first term
+    { return e1;}
+}
+
+Stm Stm(): {Token id; Token val;}
+{
+    < LET >  id = < ID > < ASSIGNEQ > val = <INT> < SEMICOLON > { return new LetStm(id.image, Integer.parseInt(val.image)); }
 }
 
 Exp Term(): {Exp e1; String op; Exp e2;}
 {
     e1 = Literal() ( op = OpLvlTwo() e2 = Literal() {e1 = new BinOpExp(e1, op, e2); } )*
-    { return e1; } //wrong, testing
+    { return e1; } //
 }
 
 Exp Literal(): {Token lit;}
 {
-    lit = <INT> {return new IntExp(Integer.parseInt(lit.image));} //correct
+    lit = <INT> {return new IntExp(Integer.parseInt(lit.image));}
 }
 
 String OpLvlTwo(): {Token op;}
 {
     op = <TIMES> { return op.image; }
-    | op = <DIVIDE> { return op.image; } //think correct
+    | op = <DIVIDE> { return op.image; }
 }
 
 String OpLvlOne(): {Token op;}

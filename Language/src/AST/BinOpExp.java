@@ -40,7 +40,7 @@ public class BinOpExp extends Exp {
     }
 
     public String toString() {
-        return "BinOpExp(" + left.toString() + ", " + op + ", " + right.toString() + ")";
+        return "BinOpExp(" + left.toString() + op  + right.toString() + ")";
     }
 
 }
