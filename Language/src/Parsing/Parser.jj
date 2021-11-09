@@ -1,12 +1,26 @@
 PARSER_BEGIN(Parser)
 package Parsing;
 import AST.*;
+import java.io.IOException;
+import Exceptions.*;
+import Util.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 public class  Parser {
     public static void main(String[] args) {
                      try {
-                         ASTNode result = new Parser(new java.io.StringReader(args[0])).S(); //Read the program from cmd line and parse with S() as start
-                         //new Parser(new java.io.StringReader(args[0])).S();
-                         System.out.println(result); //Print result of parsing
+                         String prefix = "D:\\CodingStuff\\Projects\\Projects\\Language\\tests\\";
+                         String program = Files.readString(Paths.get(prefix+"test_files\\"+args[0]));
+                         String expectedResult = Files.readString(Paths.get(prefix+"expected_results\\"+args[0]));
+                         ASTNode result = new Parser(new java.io.StringReader(program)).S(); //Read the program from cmd line and parse with S() as start
+
+                         if (!(result.toString().equals(expectedResult))) {
+                             System.out.println("Expected was: " + expectedResult);
+                             System.out.println("Actual was: " + result.toString());
+                             throw new TestException("Comparision difference at index: " + Util.indexOfDifference(expectedResult, program));
+                         }
+                         System.out.println("Test successful!");
+
                      } catch (Throwable e) {
                          // Catching Throwable is ugly but JavaCC throws Error objects!
                          System.out.println("Syntax check failed: " + e.getMessage());
@@ -53,9 +67,9 @@ Exp Exp(): {Exp e1; String op; Exp e2;}
     { return e1;}
 }
 
-Stm Stm(): {Token id; Token val;}
+Stm Stm(): {Token id; Exp exp;}
 {
-    < LET >  id = < ID > < ASSIGNEQ > val = <INT> < SEMICOLON > { return new LetStm(id.image, Integer.parseInt(val.image)); }
+    < LET >  id = < ID > < ASSIGNEQ > exp = Exp() < SEMICOLON > { return new LetStm(id.image, exp); }
 }
 
 Exp Term(): {Exp e1; String op; Exp e2;}

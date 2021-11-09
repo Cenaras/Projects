@@ -19,16 +19,16 @@ public class BinOpExp extends Exp {
         int rightEval = right.eval();
         int result = 0;
         switch (this.op) {
-            case "PLUS":
+            case "+":
                 result = leftEval + rightEval;
                 break;
-            case "MINUS":
+            case "-":
                 result = leftEval - rightEval;
                 break;
-            case "TIMES":
+            case "*":
                 result = leftEval * rightEval;
                 break;
-            case "DIVIDE":
+            case "/":
                 if (rightEval != 0) {
                     result = leftEval / rightEval;
                     break;

@@ -1,16 +1,23 @@
 package AST;
 
+import Exceptions.IllegalArithmeticException;
+
 public class LetStm extends Stm {
 
     String id;
-    int value;
-    public LetStm(String id, int value)
+    Exp exp;
+    public LetStm(String id, Exp exp)
     {
         this.id = id;
-        this.value = value;
+        this.exp = exp;
     }
 
     public String toString() {
-        return "LetStm(" + id + " = " + value + ")";
+        return "LetStm(" + id + "=" + exp.toString() + ")";
+    }
+
+    @Override
+    public int eval() throws IllegalArithmeticException {
+        return 0;
     }
 }
