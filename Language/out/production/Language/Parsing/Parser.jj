@@ -1,7 +1,6 @@
 PARSER_BEGIN(Parser)
 package Parsing;
 import AST.*;
-import java.io.IOException;
 import Exceptions.*;
 import Util.*;
 import java.nio.file.Files;
@@ -12,7 +11,7 @@ public class  Parser {
                          String prefix = "D:\\CodingStuff\\Projects\\Projects\\Language\\tests\\";
                          String program = Files.readString(Paths.get(prefix+"test_files\\"+args[0]));
                          String expectedResult = Files.readString(Paths.get(prefix+"expected_results\\"+args[0]));
-                         ASTNode result = new Parser(new java.io.StringReader(program)).S(); //Read the program from cmd line and parse with S() as start
+                         Program result = new Parser(new java.io.StringReader(program)).S(); //Read the program from cmd line and parse with S() as start
 
                          if (!(result.toString().equals(expectedResult))) {
                              System.out.println("Expected was: " + expectedResult);
@@ -56,18 +55,23 @@ SKIP : {
 /*  PARSER AND GRAMMAR GOES HERE */
 //< LET > <ID > < ASSIGNEQ > <INT>
 
-ASTNode S(): {Exp e; Stm s;}
+Program S(): {StatementList s;}
 {
-    e = Exp() <EOF> { return e; }
-    | s = Stm() <EOF> { return s; }
+    s = StmList() <EOF> { return new Program(s); }
 }
+
+StatementList StmList(): {Statement s1;}
+{
+    s1 = Stm() ( <SEMICOLON> Stm() )* {StatementList statements = new StatementList(); statements.addStatement(s1); return statements;}
+}
+
 Exp Exp(): {Exp e1; String op; Exp e2;}
 {
     e1 = Term() (op = OpLvlOne() e2 = Term() { e1 = new BinOpExp(e1, op, e2); } )* //We only overwrite e1, if the Kleene-Star is taken. If it is, e1 is the new expression, if not, we keep e1 as the first term
     { return e1;}
 }
 
-Stm Stm(): {Token id; Exp exp;}
+Statement Stm(): {Token id; Exp exp;}
 {
     < LET >  id = < ID > < ASSIGNEQ > exp = Exp() < SEMICOLON > { return new LetStm(id.image, exp); }
 }

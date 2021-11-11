@@ -2,7 +2,7 @@ package AST;
 
 import Exceptions.IllegalArithmeticException;
 
-public class LetStm extends Stm {
+public class LetStm implements Statement {
 
     String id;
     Exp exp;
@@ -16,8 +16,4 @@ public class LetStm extends Stm {
         return "LetStm(" + id + "=" + exp.toString() + ")";
     }
 
-    @Override
-    public int eval() throws IllegalArithmeticException {
-        return 0;
-    }
 }

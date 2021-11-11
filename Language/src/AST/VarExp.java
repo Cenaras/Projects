@@ -1,8 +1,6 @@
 package AST;
 
-import Exceptions.IllegalArithmeticException;
-
-public class VarExp extends Exp {
+public class VarExp implements Exp {
 
     String id;
     public VarExp(String id)
@@ -10,11 +8,6 @@ public class VarExp extends Exp {
         this.id = id;
     }
 
-
-    @Override
-    public int eval() throws IllegalArithmeticException {
-        return 0;
-    }
 
     @Override
     public String toString() {

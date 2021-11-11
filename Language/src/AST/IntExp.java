@@ -1,6 +1,6 @@
 package AST;
 
-public class IntExp extends Exp {
+public class IntExp implements Exp {
 
     int value;
 

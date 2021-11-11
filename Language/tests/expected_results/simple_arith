@@ -1,1 +1,1 @@
-BinOpExp(IntExp(2)+IntExp(2))
+LetStm(x=BinOpExp(IntExp(2)+IntExp(2)))
