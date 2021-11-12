@@ -3,29 +3,44 @@ package Parsing;
 import AST.*;
 import Exceptions.*;
 import Util.*;
-import java.nio.file.Files;
+import java.lang.reflect.Array;import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 public class  Parser {
-    public static void main(String[] args) {
-                     try {
-                         String prefix = "D:\\CodingStuff\\Projects\\Projects\\Language\\tests\\";
-                         String program = Files.readString(Paths.get(prefix+"test_files\\"+args[0]));
-                         String expectedResult = Files.readString(Paths.get(prefix+"expected_results\\"+args[0]));
-                         Program result = new Parser(new java.io.StringReader(program)).S(); //Read the program from cmd line and parse with S() as start
 
-                         if (!(result.toString().equals(expectedResult))) {
-                             System.out.println("Expected was: " + expectedResult);
-                             System.out.println("Actual was: " + result.toString());
-                             throw new TestException("Comparision difference at index: " + Util.indexOfDifference(expectedResult, program));
-                         }
-                         System.out.println("Test successful!");
+    String inputFilePrefix;
+    private ArrayList<LetStm> letStatements;
+    public Parser(String inputFilePrefix) {
+        this.inputFilePrefix = inputFilePrefix;
+        letStatements = new ArrayList<LetStm>();
+    }
 
-                     } catch (Throwable e) {
-                         // Catching Throwable is ugly but JavaCC throws Error objects!
-                         System.out.println("Syntax check failed: " + e.getMessage());
-                         e.printStackTrace();
-                     }
-                 }
+    public Program parse(String inputProgram) {
+        Program result = null;
+
+        try {
+            String programFile = Files.readString(Paths.get(inputFilePrefix + "test_files\\" + inputProgram));
+            String expectedResult = Files.readString(Paths.get(inputFilePrefix + "expected_results\\" +  inputProgram));
+            result = new Parser(new java.io.StringReader(programFile)).S(); //Read the program from cmd line and parse with S() as start
+
+            if (!(result.toString().equals(expectedResult))) {
+                System.out.println("Expected was: " + expectedResult);
+                System.out.println("Actual was: " + result.toString());
+                throw new TestException("Comparision difference at index: YET TO IMPLEMENT INDEX DIFFERENCE ERROR");
+            }
+            System.out.println("Test successful!");
+        } catch (Throwable e) {
+            // Catching Throwable is ugly but JavaCC throws Error objects!
+            System.out.println("Syntax check failed: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public ArrayList<LetStm> getLetStatements() {
+        return letStatements;
+    }
+
 }
 PARSER_END(Parser)
 
@@ -73,7 +88,7 @@ Exp Exp(): {Exp e1; String op; Exp e2;}
 
 Statement Stm(): {Token id; Exp exp;}
 {
-    < LET >  id = < ID > < ASSIGNEQ > exp = Exp() < SEMICOLON > { return new LetStm(id.image, exp); }
+    < LET >  id = < ID > < ASSIGNEQ > exp = Exp() < SEMICOLON > { LetStm statement = new LetStm(new IdentifierExp(id.image), exp); letStatements.add(statement); return statement; }
 }
 
 Exp Term(): {Exp e1; String op; Exp e2;}

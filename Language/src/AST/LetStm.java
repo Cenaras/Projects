@@ -1,19 +1,28 @@
 package AST;
 
-import Exceptions.IllegalArithmeticException;
+import Visitor.Visitor;
 
 public class LetStm implements Statement {
 
-    String id;
+    IdentifierExp id;
     Exp exp;
-    public LetStm(String id, Exp exp)
+    public LetStm(IdentifierExp id, Exp exp)
     {
         this.id = id;
         this.exp = exp;
     }
 
     public String toString() {
-        return "LetStm(" + id + "=" + exp.toString() + ")";
+        return "LetStm(" + id.toString() + "=" + exp.toString() + ")";
+    }
+
+    @Override
+    public void accept(Visitor v) {
+        v.visit(this);
+    }
+
+    public IdentifierExp getIdentifier() {
+        return id;
     }
 
 }

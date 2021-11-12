@@ -1,5 +1,7 @@
 package AST;
 
+import Visitor.Visitor;
+
 public class VarExp implements Exp {
 
     String id;
@@ -12,5 +14,10 @@ public class VarExp implements Exp {
     @Override
     public String toString() {
         return null;
+    }
+
+    @Override
+    public void accept(Visitor v) {
+
     }
 }

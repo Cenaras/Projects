@@ -1,1 +1,1 @@
-LetStm(y=BinOpExp(BinOpExp(IntExp(2)+BinOpExp(IntExp(3)*IntExp(4)))+BinOpExp(IntExp(2)*IntExp(3))))
+LetStm(IdentifierStatement(y)=BinOpExp(BinOpExp(IntExp(2)+BinOpExp(IntExp(3)*IntExp(4)))+BinOpExp(IntExp(2)*IntExp(3))))

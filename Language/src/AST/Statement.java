@@ -1,5 +1,8 @@
 package AST;
 
-public interface Statement{
+import Visitor.Visitor;
+
+public interface Statement {
+    public void accept(Visitor v);
 
 }

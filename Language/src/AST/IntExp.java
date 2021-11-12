@@ -1,5 +1,7 @@
 package AST;
 
+import Visitor.Visitor;
+
 public class IntExp implements Exp {
 
     int value;
@@ -14,5 +16,10 @@ public class IntExp implements Exp {
 
     public String toString() {
         return "IntExp(" + value + ")";
+    }
+
+    @Override
+    public void accept(Visitor v) {
+        v.visit(this);
     }
 }

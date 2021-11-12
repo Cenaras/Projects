@@ -1,16 +1,20 @@
-import AST.BinOpExp;
-import AST.Exp;
-import AST.IntExp;
-import Exceptions.IllegalArithmeticException;
-import Util.Util;
+import AST.Program;
+import TypeChecker.Typechecker;
 
 
 import java.io.IOException;
 
-// Test files path: D:\CodingStuff\Projects\Projects\Language\tests\test_files
 public class Main {
 
-    public static void main(String[] args) throws IllegalArithmeticException, IOException {
+    public static void main(String[] args) throws IOException {
+        String filePrefix = "D:\\CodingStuff\\Projects\\Projects\\Language\\tests\\";
+        Parser parser = new Parser(filePrefix);
+
+        Program result = parser.parse(args[0]);
+        Typechecker typechecker = new Typechecker(result);
+        typechecker.analyzeProgram();
+
+
 
     }
 

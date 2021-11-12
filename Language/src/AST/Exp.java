@@ -1,7 +1,10 @@
 package AST;
 
 
-public interface Exp {
+import Types.Type;
+import Visitor.Visitor;
 
+public interface Exp {
+    public void accept(Visitor v);
 
 }

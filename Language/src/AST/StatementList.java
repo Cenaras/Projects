@@ -1,28 +1,34 @@
 package AST;
 
-import Exceptions.IllegalArithmeticException;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class StatementList {
-    List<Statement> statemenList;
+    List<Statement> statementList;
 
     public StatementList() {
-        statemenList = new ArrayList<>();
+        statementList = new ArrayList<>();
     }
 
     public void addStatement(Statement statement) {
-        statemenList.add(statement);
+        statementList.add(statement);
     }
 
     public String toString()
     {
         String result = "";
-        for(Statement s : statemenList) {
+        for(Statement s : statementList) {
             result += s.toString();
         }
         return result;
+    }
+
+    public List<Statement> getList() {
+        return statementList;
+    }
+
+    public Statement getStatementAt(int i) {
+        return statementList.get(i);
     }
 
 }

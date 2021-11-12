@@ -1,5 +1,8 @@
 package AST;
 
+import Types.Type;
+import Visitor.Visitor;
+
 public class BinOpExp implements Exp {
 
     Exp left;
@@ -16,4 +19,15 @@ public class BinOpExp implements Exp {
         return "BinOpExp(" + left.toString() + op  + right.toString() + ")";
     }
 
+    public void accept(Visitor v) {
+        v.visit(this);
+    }
+
+    public Exp getLeft() {
+        return left;
+    }
+
+    public Exp getRight() {
+        return right;
+    }
 }
