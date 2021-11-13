@@ -1,4 +1,5 @@
 import AST.Program;
+import Lexing.Lexer;
 import TypeChecker.Typechecker;
 
 
@@ -8,11 +9,16 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         String filePrefix = "D:\\CodingStuff\\Projects\\Projects\\Language\\tests\\";
-        Parser parser = new Parser(filePrefix);
+        Lexer lexer = new Lexer(filePrefix + "test_files\\" + args[0]);
 
-        Program result = parser.parse(args[0]);
-        Typechecker typechecker = new Typechecker(result);
-        typechecker.analyzeProgram();
+        lexer.testStuff();
+        lexer.getToken();
+
+        //Parser parser = new Parser(filePrefix);
+
+        //Program result = parser.parse(args[0]);
+        //Typechecker typechecker = new Typechecker(result);
+        //typechecker.analyzeProgram();
 
 
 

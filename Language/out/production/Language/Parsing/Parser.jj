@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class  Parser {
 
     String inputFilePrefix;
-    private ArrayList<LetStm> letStatements;
+    public ArrayList<LetStm> letStatements;
     public Parser(String inputFilePrefix) {
         this.inputFilePrefix = inputFilePrefix;
         letStatements = new ArrayList<LetStm>();
