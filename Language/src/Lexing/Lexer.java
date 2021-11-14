@@ -12,7 +12,7 @@ public class Lexer {
     private int columnNumber = 0;
     private String nextChar;
 
-    Map<String, TokenType> keywords;
+    private Map<String, TokenType> keywords;
 
 
     public Lexer(String programSource) throws IOException {
@@ -29,39 +29,58 @@ public class Lexer {
     }
 
     private String readNextChar() throws IOException {
-        String val = Character.toString((char) reader.read());
-        while (isCharSkippable(val)) {
-            columnNumber++;
-            val = Character.toString((char) reader.read());
-        }
-        return val;
-
+        columnNumber++;
+        return Character.toString((char) reader.read());
+        // \t is interpreted as a space, so it is implicitly handled by this case for now
     }
 
-    //Add more skippable rules
-    private boolean isCharSkippable(String next) {
-        if (next.equals(" ")) {
-            return true;
-        }
-        return false;
+    public boolean canSkipChar(String token) {
+        return (token.equals(" ")
+                || token.equals("\r")
+                || token.equals("\n"));
     }
+
+
 
     public void testStuff() {
 
     }
 
     public Token getToken() throws IOException {
+        //Skip all non-tokenizable entries. If newline, reset columNumber and increment lineNumber
+        while (canSkipChar(nextChar)) {
+            if (nextChar.equals("\n")) {
+                lineNumber++;
+                columnNumber = 0;
+            } //Set to 0 since we directly increment it afterwards
+            nextChar = readNextChar();
+        }
 
         if (isDigit(nextChar)) {
             String acc = nextChar;
             nextChar = readNextChar();
             while (isDigit(nextChar)) {
-                acc = acc + nextChar;
+                acc +=  nextChar;
                 nextChar = readNextChar();
             }
             return new Token(TokenType.INT, new TokenData(Integer.parseInt(acc)), lineNumber, columnNumber);
         }
 
+        //Ensure that we actually return stuff at the right time
+        if (Character.isLetter(nextChar.charAt(0))) { //Only one char in each String
+            String acc = nextChar;
+            nextChar = readNextChar();
+            while (Character.isLetterOrDigit(nextChar.charAt(0))) {
+                acc += nextChar;
+                nextChar = readNextChar();
+            }
+            TokenType typeOfToken = keywords.get(acc);
+            if (typeOfToken != null) {
+                return new Token(typeOfToken, new TokenData(), lineNumber, columnNumber);
+            }
+            //Check for other keywords (i.e. true, false, int, ...)
+            return new Token(TokenType.ID, new TokenData(acc), lineNumber, columnNumber);
+        }
 
         switch (nextChar) {
             case "+":
@@ -80,26 +99,21 @@ public class Lexer {
                 nextChar = readNextChar();
                 return new Token(TokenType.SEMICOLON, new TokenData(), lineNumber, columnNumber);
 
-
             default:
                 return new Token(TokenType.EOF, new TokenData(), lineNumber, columnNumber);
-
         }
     }
-
 
     private boolean isDigit(String str) {
         if (str == null) {
             return false;
         }
-
         try {
             Integer.parseInt(str);
             return true;
         } catch (Exception e) {
             return false;
         }
-
     }
 
 }

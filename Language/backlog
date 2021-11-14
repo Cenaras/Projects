@@ -1,0 +1,11 @@
+Notes:
+Lex Assignments; i.e. <LET>
+
+Start on the parser. Simple stuff, only BinOps and Assignment Statements
+Figure out if program is list of statements or can be expression
+
+Start on type checker of simple programs - BinOps again.
+
+LLVM as Intermediate Representation language? Or something else better suited for Java?
+
+Convert to Java ByteCode I guess?

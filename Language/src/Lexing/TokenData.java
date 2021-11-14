@@ -2,7 +2,7 @@ package Lexing;
 
 public class TokenData {
     int integerValue;
-    String stringValue;
+    String identifier;
 
     //No extra data is required for parsing lexed token
     TokenData() { }
@@ -10,4 +10,9 @@ public class TokenData {
     TokenData(int integerValue) {
         this.integerValue = integerValue;
     }
+
+    TokenData(String identifier) {
+        this.identifier = identifier;
+    }
+
 }

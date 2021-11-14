@@ -20,9 +20,14 @@ public class Token {
     //Primarily for early debugging purposes
     public String toString() {
         if (type.equals(TokenType.INT)) {
-            return type.toString() + "(" + tokenData.integerValue + ")";
+            return type.toString() + "(" + tokenData.integerValue + ") " + lineNumber + ":" + columnNumber;
         }
-        return type.toString();
+
+        if (type.equals(TokenType.ID)) {
+            return type.toString() + "(" + tokenData.identifier + ") " + lineNumber + ":" + columnNumber;
+        }
+
+        return type.toString() + " " +  lineNumber + ":" + columnNumber;
     }
 
 
