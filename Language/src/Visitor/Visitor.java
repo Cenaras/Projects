@@ -1,9 +1,6 @@
 package Visitor;
 
-import AST.BinOpExp;
-import AST.IntExp;
-import AST.LetStm;
-import AST.Program;
+import AST.*;
 import Types.Type;
 
 public interface Visitor {
@@ -11,4 +8,5 @@ public interface Visitor {
     public void visit(BinOpExp exp);
     public void visit(IntExp exp);
     public void visit(LetStm let);
+    void visit(IdentifierExp identifierExp);
 }

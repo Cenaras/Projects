@@ -1,6 +1,8 @@
 package AST;
 
-public class IdentifierExp {
+import Visitor.Visitor;
+
+public class IdentifierExp implements Exp{
     String id;
     public IdentifierExp(String id) {
         this.id = id;
@@ -12,5 +14,10 @@ public class IdentifierExp {
     public String toString()
     {
         return "IdentifierExp(" + id + ")";
+    }
+
+    @Override
+    public void accept(Visitor v) {
+        v.visit(this);
     }
 }

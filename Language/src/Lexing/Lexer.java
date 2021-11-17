@@ -24,6 +24,8 @@ public class Lexer {
         keywords.put("/", TokenType.DIVIDE);
         keywords.put("=", TokenType.ASSIGNEQ);
         keywords.put(";", TokenType.SEMICOLON);
+
+        keywords.put("let", TokenType.LET);
         nextChar = readNextChar();
 
     }
@@ -98,6 +100,9 @@ public class Lexer {
             case ";":
                 nextChar = readNextChar();
                 return new Token(TokenType.SEMICOLON, new TokenData(), lineNumber, columnNumber);
+            case "=":
+                nextChar = readNextChar();
+                return new Token(TokenType.ASSIGNEQ, new TokenData(), lineNumber, columnNumber);
 
             default:
                 return new Token(TokenType.EOF, new TokenData(), lineNumber, columnNumber);

@@ -15,4 +15,12 @@ public class TokenData {
         this.identifier = identifier;
     }
 
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public int getIntegerValue() {
+        return integerValue;
+    }
+
 }

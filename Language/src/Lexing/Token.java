@@ -17,6 +17,10 @@ public class Token {
         return type;
     }
 
+    public TokenData getTokenData() {
+        return tokenData;
+    }
+
     //Primarily for early debugging purposes
     public String toString() {
         if (type.equals(TokenType.INT)) {
@@ -30,5 +34,13 @@ public class Token {
         return type.toString() + " " +  lineNumber + ":" + columnNumber;
     }
 
+
+    public int getLineNumber() {
+        return lineNumber;
+    }
+
+    public int getColumnNumber() {
+        return columnNumber;
+    }
 
 }

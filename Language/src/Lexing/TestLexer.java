@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public class TestLexer {
     public static void main(String[] args) throws IOException {
-        Lexer lexer = new Lexer("D:\\CodingStuff\\Projects\\Projects\\Language\\tests\\lexing\\test_files\\simple_id");
+        Lexer lexer = new Lexer("D:\\CodingStuff\\Projects\\Projects\\Language\\tests\\lexing\\test_files\\simple_let");
 
         lexer.testStuff();
 
