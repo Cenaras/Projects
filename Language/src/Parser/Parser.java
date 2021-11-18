@@ -8,15 +8,23 @@ import Types.IntegerType;
 import Types.Type;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Parser {
 
     private Lexer lexer;
     private Token nextToken;
+    private Map<TokenType, Integer> precedence; //Higher level gives greater precedence
 
     public Parser(String file) throws IOException {
         this.lexer = new Lexer(file);
         nextToken = lexer.getToken();
+        precedence = new HashMap<>();
+        precedence.put(TokenType.PLUS, 1);
+        precedence.put(TokenType.MINUS, 1);
+        precedence.put(TokenType.TIMES, 2);
+        precedence.put(TokenType.DIVIDE, 2);
     }
 
 
@@ -25,8 +33,7 @@ public class Parser {
     private void eat(TokenType expectedToken) throws IOException {
         if (expectedToken == nextToken.getType()) {
             nextToken = lexer.getToken();
-        }
-        else {
+        } else {
             emitError(expectedToken);
         }
     }
@@ -49,7 +56,7 @@ public class Parser {
     //Placeholder
     private Type parseType() throws IOException {
         Type type = null;
-        if(nextToken.getType() == TokenType.INT) {
+        if (nextToken.getType() == TokenType.INT) {
             eat(TokenType.INT);
             type = new IntegerType();
         }
@@ -61,30 +68,31 @@ public class Parser {
         if (nextToken.getType() == TokenType.ID) {
             id = nextToken.getTokenData().getIdentifier();
             eat(TokenType.ID);
+            return new IdentifierExp(id);
         }
-        return new IdentifierExp(id);
+        throw new IOException();
     }
 
     //Parse the expression in a left-to-right manner:
     private Exp parseExp() throws IOException {
         Exp base = parseBaseExp();
-        return parseExpLeftToRight(base); //Essentially accumulates base into a composite expression
-
+        return parseExpLeftToRight(base, 0); //Essentially accumulates base into a composite expression
     }
 
-    //For now, only allows single composite expressions
-    private Exp parseExpLeftToRight(Exp base) throws IOException {
-        TokenType binOp = nextToken.getType();
-        eat(binOp);
-        Exp right = parseBaseExp();
+    //https://en.wikipedia.org/wiki/Operator-precedence_parser
 
-        switch (binOp) {
-            case PLUS:
-                base = new BinOpExp(base, "+", right);
-                break;
-            case MINUS:
-                base = new BinOpExp(base, "-", right);
-                break;
+    private Exp parseExpLeftToRight(Exp base, int minPrecedence) throws IOException {
+        TokenType lookahead = nextToken.getType();
+        while (precedence.getOrDefault(lookahead, -1) >= minPrecedence ) {
+            TokenType op = nextToken.getType();
+            eat(op);
+            Exp right = parseBaseExp();
+            lookahead = nextToken.getType();
+            while (precedence.getOrDefault(lookahead, -1) > precedence.get(op)) { //If right associative then >= else just >: When adding ^ to language, get a "isRightAssoc()" and make a || case with >=
+                 right = parseExpLeftToRight(right, precedence.get(op) + 1);
+                 lookahead = nextToken.getType();
+            }
+            base = new BinOpExp(base, op, right);
         }
         return base;
     }
@@ -101,17 +109,6 @@ public class Parser {
         return null; //Report error
     }
 
-    //Have a way to distinguish between 2 and 2 + 3
-//    private Exp parseExp() throws IOException {
-//        switch (nextToken.getType()) {
-//            case INT:
-//                int val = nextToken.getTokenData().getIntegerValue();
-//                eat(TokenType.INT);
-//
-//        }
-//
-//
-//    }
 
 
     /*Idea's: Have a function for each of our non-terminals in our grammar.
@@ -121,21 +118,19 @@ public class Parser {
 
 
     /*  GRAMMAR:
-    *
-    *   StatementList   := { Statement }
-    *
-    *   Statement       :=
-    *
-    *   VarDecl         := LET ID = Exp
-    *
-    *   Exp             := Exp op Exp
-    *                   | INT
-    *                   | ID
-    *                   | BaseExp
-    *
-    *   Op              := + | - | * | /
-    *
-    * */
-
-
+     *
+     *   StatementList   := { Statement }
+     *
+     *   Statement       :=
+     *
+     *   VarDecl         := LET ID = Exp
+     *
+     *   Exp             := Exp op Exp
+     *                   | INT
+     *                   | ID
+     *                   | BaseExp
+     *
+     *   Op              := + | - | * | /
+     *
+     * */
 }
