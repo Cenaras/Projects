@@ -20,9 +20,5 @@ public class Program {
         return statementList;
     }
 
-    public void accept(Visitor v) {
-        v.visit(this);
-    }
-
 
 }

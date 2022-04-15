@@ -1,9 +1,9 @@
 package Parser;
 
 import AST.*;
-import Lexing.Lexer;
-import Lexing.Token;
-import Lexing.TokenType;
+import lexing.Lexer;
+import lexing.Token;
+import lexing.TokenType;
 import Types.IntegerType;
 import Types.Type;
 
@@ -13,9 +13,9 @@ import java.util.Map;
 
 public class Parser {
 
-    private Lexer lexer;
+    private final Lexer lexer;
     private Token nextToken;
-    private Map<TokenType, Integer> precedence; //Higher level gives greater precedence
+    private final Map<TokenType, Integer> precedence; //Higher level gives greater precedence
 
     public Parser(String file) throws IOException {
         this.lexer = new Lexer(file);
@@ -27,6 +27,11 @@ public class Parser {
         precedence.put(TokenType.DIVIDE, 2);
     }
 
+
+    public Program generateAst() {
+        return new Program(null);
+
+    }
 
     //Maybe return a bool, and if we eat then we advance?
     //eat: Check if our next token is equal to the argument. If it is, proceed, else emit error.

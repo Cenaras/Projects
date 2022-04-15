@@ -1,4 +1,4 @@
-package Lexing;
+package lexing;
 
 public class TokenData {
     int integerValue;

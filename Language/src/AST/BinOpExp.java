@@ -1,8 +1,6 @@
 package AST;
 
-import Lexing.Token;
-import Lexing.TokenType;
-import Types.Type;
+import lexing.TokenType;
 import Visitor.Visitor;
 
 public class BinOpExp implements Exp {

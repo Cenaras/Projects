@@ -65,7 +65,7 @@ SKIP : {
     | "\t"
     | "\r"
 }
-//NOTES: javacc Lexing.jj, javac *.java afterwards. Add "package Lexing;" to files if it dissapears - or remove stuff from the package if it bothers you.
+//NOTES: javacc lexing.jj, javac *.java afterwards. Add "package lexing;" to files if it dissapears - or remove stuff from the package if it bothers you.
 
 /*  PARSER AND GRAMMAR GOES HERE */
 //< LET > <ID > < ASSIGNEQ > <INT>

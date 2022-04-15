@@ -1,4 +1,4 @@
-package Lexing;
+package lexing;
 
 public enum TokenType {
     INT,
